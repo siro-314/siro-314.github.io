@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電波人間QRコード検索ツール</title>
+<style>
+body {
+font-family: 'Helvetica Neue', Arial, sans-serif;
+margin: 0;
+padding: 20px;
+background: #f5f5f5;
+}
+.container {
+max-width: 800px;
+margin: 0 auto;
+background: white;
+border-radius: 12px;
+box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+overflow: hidden;
+}
+.header {
+background: #4285f4;
+color: white;
+padding: 20px;
+text-align: center;
+}
+.title {
+font-size: 24px;
+font-weight: bold;
+margin: 0;
+}
+.search-section {
+padding: 20px;
+background: #fafafa;
+}
+.search-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 8px;
+margin-bottom: 20px;
+}
+.search-field {
+position: relative;
+}
+.field-container {
+display: flex;
+flex-direction: column;
+}
+.field-label {
+font-weight: bold;
+color: #333;
+font-size: 13px;
+margin-bottom: 4px;
+}
+.field-input {
+background: white;
+border: 2px solid #e0e0e0;
+border-radius: 6px;
+padding: 8px 12px;
+font-size: 13px;
+width: 100%;
+box-sizing: border-box;
+transition: all 0.2s;
+min-height: 20px;
+}
+.field-input:focus {
+outline: none;
+border-color: #4285f4;
+box-shadow: 0 2px 8px rgba(66,133,244,0.2);
+}
+.search-button {
+background: #4285f4;
+color: white;
+border: none;
+padding: 12px 40px;
+border-radius: 6px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+width: 100%;
+transition: background 0.2s;
+}
+.search-button:hover {
+background: #3367d6;
+}
+.search-button:disabled {
+background: #ccc;
+cursor: not-allowed;
+}
+.adblock-notice {
+background: #fff3cd;
+border: 1px solid #ffeaa7;
+padding: 20px;
+margin: 0 20px 20px 20px;
+border-radius: 8px;
+text-align: center;
+display: none;
+}
+.adblock-notice-text {
+color: #856404;
+font-size: 14px;
+margin-bottom: 10px;
+}
+.ad-section {
+background: #fff3cd;
+border: 1px solid #ffeaa7;
+padding: 20px;
+margin: 0 20px;
+border-radius: 8px;
+text-align: center;
+display: none;
+}
+.ad-placeholder {
+color: #856404;
+font-size: 14px;
+font-style: italic;
+}
+.countdown {
+margin-top: 10px;
+font-size: 12px;
+color: #666;
+}
+.results-section {
+padding: 20px;
+display: none;
+}
+.results-header {
+font-size: 20px;
+font-weight: bold;
+margin-bottom: 20px;
+color: #333;
+}
+.result-card {
+background: white;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+transition: box-shadow 0.2s;
+}
+.result-card:hover {
+box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-info {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+gap: 15px;
+margin-bottom: 15px;
+}
+.info-item {
+font-size: 14px;
+}
+.info-label {
+font-weight: bold;
+color: #666;
+}
+.info-value {
+color: #333;
+margin-top: 3px;
+}
+.tweet-link {
+background: #1da1f2;
+color: white;
+text-decoration: none;
+padding: 8px 16px;
+border-radius: 6px;
+display: inline-block;
+font-size: 14px;
+transition: background 0.2s;
+}
+.tweet-link:hover {
+background: #1991db;
+}
+.no-results {
+text-align: center;
+color: #666;
+font-style: italic;
+padding: 40px;
+}
+.error-message {
+background: #f8d7da;
+border: 1px solid #f5c6cb;
+color: #721c24;
+padding: 20px;
+margin: 20px;
+border-radius: 8px;
+text-align: center;
+display: none;
+}
+.footer {
+text-align: center;
+padding: 20px;
+background: #f5f5f5;
+font-size: 12px;
+border-top: 1px solid #eee;
+}
+.footer a {
+margin: 0 10px;
+color: #666;
+text-decoration: none;
+}
+.footer a:hover {
+color: #4285f4;
+text-decoration: underline;
+}
+.footer p {
+margin-top: 10px;
+color: #999;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1 class="title">電波人間QRコード検索ツール</h1>
+</div>
+
+<div class="adblock-notice" id="adblockNotice">
+<div class="adblock-notice-text">
+広告ブロッカーが検出されました
+</div>
+<div style="font-size: 12px; color: #666;">
+このツールは広告収入で運営されています。<br>
+検索を利用するには広告ブロッカーを無効にしていただけると助かります。
+</div>
+<button onclick="closeAdblockNotice()" style="margin-top: 10px; padding: 5px 15px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer;">理解しました</button>
+</div>
+
+<div class="error-message" id="errorMessage">
+検索機能でエラーが発生しました。広告を正常に表示してから再試行してください。
+</div>
+
+<div class="search-section">
+<div class="search-grid">
+<!-- アンテナ -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">アンテナ</div>
+<input type="text" class="field-input" id="antenna-input" placeholder="例: アンテナ無し" oninput="updateSearchCriteria('antenna', this.value)">
+</div>
+</div>
+
+<!-- 体色 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">体色</div>
+<select class="field-input" id="bodyColor-input" onchange="updateSearchCriteria('bodyColor', this.value)">
+<option value="">選択してください</option>
+<option value="赤">🟥 赤</option>
+<option value="青">🟦 青</option>
+<option value="黄">🟨 黄</option>
+<option value="橙">🟧 橙</option>
+<option value="緑">🟩 緑</option>
+<option value="水">🔵 水</option>
+<option value="黒">⬛ 黒</option>
+<option value="ピンク">🩷 ピンク</option>
+<option value="銀">⚫ 銀</option>
+<option value="金">🟡 金</option>
+</select>
+</div>
+</div>
+
+<!-- 体格 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">体格</div>
+<select class="field-input" id="bodyType-input" onchange="updateSearchCriteria('bodyType', this.value)">
+<option value="">選択してください</option>
+<option value="最大">最大</option>
+<option value="準大">準大</option>
+<option value="中間">中間</option>
+<option value="準速">準速</option>
+<option value="最速">最速</option>
+</select>
+</div>
+</div>
+
+<!-- 回避率 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">回避率</div>
+<input type="text" class="field-input" id="dodgeRate-input" placeholder="例: 3+" oninput="updateSearchCriteria('dodgeRate', this.value)">
+</div>
+</div>
+
+<!-- 頭 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">頭</div>
+<input type="text" class="field-input" id="head-input" placeholder="例: 太陽" oninput="updateSearchCriteria('head', this.value)">
+</div>
+</div>
+
+<!-- 手数 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">手数</div>
+<input type="text" class="field-input" id="attackCount-input" placeholder="例: 1手" oninput="updateSearchCriteria('attackCount', this.value)">
+</div>
+</div>
+
+<!-- 柄種類 -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">柄種類</div>
+<input type="text" class="field-input" id="patternType-input" placeholder="例: 花" oninput="updateSearchCriteria('patternType', this.value)">
+</div>
+</div>
+
+<!-- 柄ランク -->
+<div class="search-field">
+<div class="field-container">
+<div class="field-label">柄ランク</div>
+<select class="field-input" id="patternRank-input" onchange="updateSearchCriteria('patternRank', this.value)">
+<option value="">選択してください</option>
+<option value="S">S</option>
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="単色">単色</option>
+</select>
+</div>
+</div>
+</div>
+
+<button class="search-button" id="searchButton" onclick="executeSearch()">検索する</button>
+</div>
+
+<div class="ad-section" id="adSection">
+<div class="ad-placeholder">【Google Adsense広告 - 5秒でスキップ】</div>
+<div class="countdown">
+広告をスキップするまで <span id="countdown">5</span> 秒
+</div>
+</div>
+
+<div class="results-section" id="resultsSection">
+<div class="results-header" id="resultsHeader">検索結果: 0件</div>
+<div id="resultsContainer"></div>
+</div>
+
+<div class="footer">
+<a href="privacy.html">プライバシーポリシー</a>
+<a href="about.html">このサイトについて</a>
+<a href="https://github.com/siro-314/dennpa.QR.serch">GitHub</a>
+<p>&copy; 2025 電波人間QRコード検索ツール</p>
+</div>
+</div>
+
+<script>
+// サンプルデータ
+const sampleData = [
+  {
+    "antenna": "無敵",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "縦楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "無敵",
+    "bodyColor": "黒",
+    "bodyType": "最大",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "よけにくい",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "三角",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "足元ガード",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "縦楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "復活",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "横楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "三体攻撃",
+    "bodyColor": "水",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "丸",
+    "attackCount": "3手",
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "ノックダウン",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "横楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "なおす",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "縦楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "おそくなれ",
+    "bodyColor": "黄",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "丸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "はやくなれ",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "三角",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "ねむらせる",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "三角",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "回復",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": "ねむらせる",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": "おそくなれ",
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "3+",
+    "head": "丸",
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "3-",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "3+",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "丸",
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": "はやくなれ",
+    "bodyColor": "紫",
+    "bodyType": "最速",
+    "dodgeRate": "3-",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": "回復",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "桃",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": "三角",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "桃",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "桃",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "水色",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "橙",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "青",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "緑",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "紫",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "黄",
+    "bodyType": "最大",
+    "dodgeRate": "3+",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/soukasaku_20/n/n00d3e4cc3fcd"
+  },
+  {
+    "antenna": null,
+    "bodyColor": "黒",
+    "bodyType": "最大",
+    "dodgeRate": "0",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": "黒",
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "しびれとる",
+    "bodyColor": null,
+    "bodyType": "最大",
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "アンテナなし",
+    "bodyColor": null,
+    "bodyType": "最大",
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "アンテナなし",
+    "bodyColor": null,
+    "bodyType": "最大",
+    "dodgeRate": "0",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "ぜんぶなおす",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": "準最大",
+    "dodgeRate": "3+",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "アンテナなし",
+    "bodyColor": null,
+    "bodyType": "最大",
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": "黒",
+    "bodyType": "準速",
+    "dodgeRate": "0",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "すこしむてき",
+    "bodyColor": null,
+    "bodyType": null,
+    "dodgeRate": null,
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://x.com/ndenpafnormal"
+  },
+  {
+    "antenna": "興奮",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "三角",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "興奮",
+    "bodyColor": "緑",
+    "bodyType": "最大",
+    "dodgeRate": "0",
+    "head": "横楕円",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://deltapbpoke.hatenablog.com/entry/2025/03/17/044834"
+  },
+  {
+    "antenna": "みんよけ",
+    "bodyColor": "黒",
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/gyara1207/n/n932485cad68c"
+  },
+  {
+    "antenna": "みんよけ",
+    "bodyColor": "黒",
+    "bodyType": "最大",
+    "dodgeRate": "0",
+    "head": "石鹸",
+    "attackCount": null,
+    "pattern": {
+      "type": "単色",
+      "rank": "単色"
+    },
+    "url": "https://note.com/gyara1207/n/n932485cad68c"
+  },
+  {
+    "antenna": "レアアンテナ",
+    "bodyColor": null,
+    "bodyType": "最速",
+    "dodgeRate": "0",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/gyara1207/n/n932485cad68c"
+  },
+  {
+    "antenna": "レアアンテナ",
+    "bodyColor": null,
+    "bodyType": "最大",
+    "dodgeRate": "3",
+    "head": null,
+    "attackCount": null,
+    "pattern": {
+      "type": "その他",
+      "rank": null
+    },
+    "url": "https://note.com/gyara1207/n/n932485cad68c"
+  }
+];
+
+let searchCriteria = {
+antenna: '',
+bodyColor: '',
+bodyType: '',
+dodgeRate: '',
+head: '',
+attackCount: '',
+patternType: '',
+patternRank: ''
+};
+
+// 検索機能は常に有効（広告収益化前の開発段階）
+let searchFunctionEnabled = true;
+
+// 検索ロジックを最初から有効化
+window.filterData = function() {
+return sampleData.filter(item => {
+// 各条件でフィルタリング
+if (searchCriteria.antenna && (!item.antenna || !item.antenna.includes(searchCriteria.antenna))) return false;
+if (searchCriteria.bodyColor && item.bodyColor !== searchCriteria.bodyColor) return false;
+if (searchCriteria.bodyType && item.bodyType !== searchCriteria.bodyType) return false;
+if (searchCriteria.dodgeRate && (!item.dodgeRate || !item.dodgeRate.includes(searchCriteria.dodgeRate))) return false;
+if (searchCriteria.head && (!item.head || !item.head.includes(searchCriteria.head))) return false;
+if (searchCriteria.attackCount && (!item.attackCount || !item.attackCount.includes(searchCriteria.attackCount))) return false;
+if (searchCriteria.patternType && (!item.pattern.type || !item.pattern.type.includes(searchCriteria.patternType))) return false;
+if (searchCriteria.patternRank && item.pattern.rank !== searchCriteria.patternRank) return false;
+
+return true;
+});
+};
+
+function updateSearchCriteria(field, value) {
+searchCriteria[field] = value.trim();
+}
+
+function executeSearch() {
+// 直接広告表示へ（開発段階ではエラーチェック無効）
+showAdAndCountdown();
+}
+
+function showAdAndCountdown() {
+const adSection = document.getElementById('adSection');
+const countdownElement = document.getElementById('countdown');
+
+adSection.style.display = 'block';
+let countdown = 5;
+countdownElement.textContent = countdown;
+
+const timer = setInterval(() => {
+countdown--;
+countdownElement.textContent = countdown;
+if (countdown <= 0) {
+clearInterval(timer);
+adSection.style.display = 'none';
+showSearchResults();
+}
+}, 1000);
+}
+
+// 将来の広告ブロック対策用の関数（現在は無効）
+// Google Adsense導入時にこれらの機能を有効化予定
+function enableSearchFunction() {
+// 実装予定
+}
+
+function restoreSearchLogic() {
+// 実装予定
+}
+
+function showSearchResults() {
+const filteredResults = window.filterData();
+displayResults(filteredResults);
+}
+
+function displayResults(results) {
+const resultsSection = document.getElementById('resultsSection');
+const resultsHeader = document.getElementById('resultsHeader');
+const resultsContainer = document.getElementById('resultsContainer');
+
+resultsHeader.textContent = `検索結果: ${results.length}件`;
+resultsSection.style.display = 'block';
+
+if (results.length === 0) {
+resultsContainer.innerHTML = '<div class="no-results">条件に一致する結果が見つかりませんでした</div>';
+return;
+}
+
+const resultsHTML = results.map(item => {
+const patternDisplay = getPatternDisplay(item.pattern);
+return `
+<div class="result-card">
+<div class="result-info">
+<div class="info-item">
+<div class="info-label">アンテナ</div>
+<div class="info-value">${item.antenna || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">体色</div>
+<div class="info-value">${item.bodyColor || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">体格</div>
+<div class="info-value">${item.bodyType || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">回避率</div>
+<div class="info-value">${item.dodgeRate || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">頭</div>
+<div class="info-value">${item.head || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">手数</div>
+<div class="info-value">${item.attackCount || '-'}</div>
+</div>
+<div class="info-item">
+<div class="info-label">柄</div>
+<div class="info-value">${patternDisplay}</div>
+</div>
+</div>
+<a href="${item.url}" class="tweet-link" target="_blank">元ツイートを見る</a>
+</div>
+`;
+}).join('');
+
+resultsContainer.innerHTML = resultsHTML;
+}
+
+function getPatternDisplay(pattern) {
+if (pattern.type && pattern.rank) {
+return `${pattern.type} (${pattern.rank})`;
+} else if (pattern.rank) {
+return pattern.rank;
+} else if (pattern.type) {
+return pattern.type;
+} else {
+return '-';
+}
+}
+
+function closeAdblockNotice() {
+document.getElementById('adblockNotice').style.display = 'none';
+}
+
+// 広告ブロック検出は一旦無効化（誤検知防止）
+// 実際のGoogle Adsense導入時に再実装
+let adBlockDetected = false;
+</script>
+</body>
+</html>
