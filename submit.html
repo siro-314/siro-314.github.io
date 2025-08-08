@@ -373,8 +373,9 @@ async function saveToPendingSubmissions(data) {
         // 現在のファイル内容を取得
         const getResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
             headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
             }
         });
         
@@ -395,17 +396,22 @@ async function saveToPendingSubmissions(data) {
         currentData.push(data);
         console.log('📝 新しいデータ追加:', data);
         
+        // UTF-8対応のBase64エンコーディング
+        const jsonContent = JSON.stringify(currentData, null, 2);
+        const encodedContent = btoa(unescape(encodeURIComponent(jsonContent)));
+        
         // ファイルを更新
         const updateResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json',
+                'X-GitHub-Api-Version': '2022-11-28'
             },
             body: JSON.stringify({
                 message: '新規QRコード投稿 - ' + new Date().toLocaleString('ja-JP'),
-                content: btoa(JSON.stringify(currentData, null, 2)),
+                content: encodedContent,
                 sha: sha
             })
         });
