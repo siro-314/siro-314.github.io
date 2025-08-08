@@ -1,3 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電波人間QRコード投稿サイト</title>
+<style>
+body {
+font-family: 'Helvetica Neue', Arial, sans-serif;
+margin: 0;
+padding: 20px;
+background: #f5f5f5;
+}
+.container {
+max-width: 800px;
+margin: 0 auto;
+background: white;
+border-radius: 12px;
+box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+overflow: hidden;
+}
+.header {
+background: #f4d142;
+color: #333;
+padding: 20px;
+text-align: center;
+position: relative;
+}
+.title {
+font-size: 24px;
+font-weight: bold;
+margin: 0;
+}
+.search-button {
+position: absolute;
+right: 20px;
+top: 50%;
+transform: translateY(-50%);
+background: none;
+border: none;
+color: #333;
+font-size: 24px;
+cursor: pointer;
+padding: 0;
+transition: opacity 0.2s;
+}
+.search-button:hover {
+opacity: 0.7;
+}
+.submit-section {
+padding: 20px;
+background: #fffbf0;
+}
+.submit-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 8px;
+margin-bottom: 20px;
+}
+.submit-field {
+position: relative;
+}
+.field-container {
+display: flex;
+flex-direction: column;
+}
+.field-label {
+font-weight: bold;
+color: #333;
+font-size: 13px;
+margin-bottom: 4px;
+}
+.field-input {
+background: white;
+border: 2px solid #e0e0e0;
+border-radius: 6px;
+padding: 8px 12px;
+font-size: 13px;
+width: 100%;
+box-sizing: border-box;
+transition: all 0.2s;
+min-height: 20px;
+}
+.field-input:focus {
+outline: none;
+border-color: #f4d142;
+box-shadow: 0 2px 8px rgba(244,209,66,0.2);
+}
+.submit-button {
+background: #f4d142;
+color: #333;
+border: none;
+padding: 12px 40px;
+border-radius: 6px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+width: 100%;
+transition: background 0.2s;
+}
+.submit-button:hover {
+background: #e6c23e;
+}
+.url-section {
+background: white;
+padding: 20px;
+margin: 20px;
+border-radius: 8px;
+border: 2px solid #f4d142;
+}
+.url-label {
+font-weight: bold;
+color: #333;
+font-size: 14px;
+margin-bottom: 8px;
+}
+.url-input {
+width: 100%;
+padding: 10px;
+border: 2px solid #e0e0e0;
+border-radius: 6px;
+font-size: 14px;
+box-sizing: border-box;
+}
+.url-input:focus {
+outline: none;
+border-color: #f4d142;
+box-shadow: 0 2px 8px rgba(244,209,66,0.2);
+}
+.success-message {
+background: #d4edda;
+border: 1px solid #c3e6cb;
+color: #155724;
+padding: 20px;
+margin: 20px;
+border-radius: 8px;
+text-align: center;
+display: none;
+}
+.footer {
+text-align: center;
+padding: 20px;
+background: #f5f5f5;
+font-size: 12px;
+border-top: 1px solid #eee;
+}
+.footer a {
+margin: 0 10px;
+color: #666;
+text-decoration: none;
+}
+.footer a:hover {
+color: #f4d142;
+text-decoration: underline;
+}
+.footer p {
+margin-top: 10px;
+color: #999;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1 class="title">電波人間QRコード投稿サイト</h1>
+<button class="search-button" onclick="location.href='index.html'" title="検索サイト">🔍</button>
+</div>
+
+<div class="submit-section">
+<div class="submit-grid">
+<!-- アンテナ -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">アンテナ</div>
+<input type="text" class="field-input" id="antenna-input" placeholder="例: 興奮" oninput="updateSubmitData('antenna', this.value)">
+</div>
+</div>
+
+<!-- 体色 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">体色</div>
+<select class="field-input" id="bodyColor-input" onchange="updateSubmitData('bodyColor', this.value)">
+<option value="">選択してください</option>
+<option value="赤">🟥 赤</option>
+<option value="青">🟦 青</option>
+<option value="黄">🟨 黄</option>
+<option value="橙">🟧 橙</option>
+<option value="緑">🟩 緑</option>
+<option value="水">🔵 水</option>
+<option value="黒">⬛ 黒</option>
+<option value="ピンク">🩷 ピンク</option>
+<option value="銀">⚫ 銀</option>
+<option value="金">🟡 金</option>
+</select>
+</div>
+</div>
+
+<!-- 体格 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">体格</div>
+<select class="field-input" id="bodyType-input" onchange="updateSubmitData('bodyType', this.value)">
+<option value="">選択してください</option>
+<option value="最大">最大</option>
+<option value="準大">準大</option>
+<option value="中間">中間</option>
+<option value="準速">準速</option>
+<option value="最速">最速</option>
+</select>
+</div>
+</div>
+
+<!-- 回避率 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">回避率</div>
+<input type="text" class="field-input" id="dodgeRate-input" placeholder="例: 3+" oninput="updateSubmitData('dodgeRate', this.value)">
+</div>
+</div>
+
+<!-- 頭 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">頭</div>
+<input type="text" class="field-input" id="head-input" placeholder="例: 三角" oninput="updateSubmitData('head', this.value)">
+</div>
+</div>
+
+<!-- 手数 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">手数</div>
+<input type="text" class="field-input" id="attackCount-input" placeholder="例: 1手" oninput="updateSubmitData('attackCount', this.value)">
+</div>
+</div>
+
+<!-- 柄種類 -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">柄種類</div>
+<input type="text" class="field-input" id="patternType-input" placeholder="例: 花" oninput="updateSubmitData('patternType', this.value)">
+</div>
+</div>
+
+<!-- 柄ランク -->
+<div class="submit-field">
+<div class="field-container">
+<div class="field-label">柄ランク</div>
+<select class="field-input" id="patternRank-input" onchange="updateSubmitData('patternRank', this.value)">
+<option value="">選択してください</option>
+<option value="S">S</option>
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="単色">単色</option>
+</select>
+</div>
+</div>
+</div>
+
+<div class="url-section">
+<div class="url-label">情報元URL（必須）</div>
+<input type="url" class="url-input" id="url-input" placeholder="https://x.com/user/status/123 または https://example.com/" oninput="updateSubmitData('url', this.value)">
+</div>
+
+<button class="submit-button" id="submitButton" onclick="executeSubmit()">投稿する</button>
+</div>
+
+<div class="success-message" id="successMessage">
+投稿ありがとうございます！<br>
+内容を確認後、サイトに反映いたします。
+</div>
+
+<div class="footer">
+<a href="privacy.html">プライバシーポリシー</a>
+<a href="about.html">このサイトについて</a>
+<a href="https://github.com/siro-314/siro-314.github.io">GitHub</a>
+<p>&copy; 2025 電波人間QRコード投稿サイト</p>
+</div>
+</div>
+
+<script>
+let submitData = {
+antenna: '',
+bodyColor: '',
+bodyType: '',
+dodgeRate: '',
+head: '',
+attackCount: '',
+patternType: '',
+patternRank: '',
+url: ''
+};
+
+let existingData = [];
+
+// 既存データとpending-submissionsを読み込んで重複チェック
+Promise.all([
+fetch('data.json').then(res => res.json()).catch(() => []),
+fetch('pending-submissions.json').then(res => res.json()).catch(() => [])
+]).then(([mainData, pendingData]) => {
+existingData = [...mainData, ...pendingData];
+});
+
+function updateSubmitData(field, value) {
+submitData[field] = value.trim();
+}
+
+function executeSubmit() {
+// 必須項目チェック
+if (!submitData.url) {
+alert('情報元URLは必須です');
+return;
+}
+
+// 重複チェック
+if (isDuplicate()) {
+alert('この情報は既に投稿済みです');
+return;
+}
+
+// JSON形式でデータを準備
+const newEntry = {
+antenna: submitData.antenna || null,
+bodyColor: submitData.bodyColor || null,
+bodyType: submitData.bodyType || null,
+dodgeRate: submitData.dodgeRate || null,
+head: submitData.head || null,
+attackCount: submitData.attackCount || null,
+pattern: {
+type: submitData.patternType || null,
+rank: submitData.patternRank || null
+},
+url: submitData.url
+};
+
+// pending-submissions.jsonに追加
+saveToPendingSubmissions(newEntry);
+
+// 成功メッセージ表示
+document.getElementById('successMessage').style.display = 'block';
+document.querySelector('.submit-section').style.display = 'none';
+
+// フォームリセット
+resetForm();
+}
+
+function isDuplicate() {
+return existingData.some(item => {
+if (submitData.url.includes('x.com') || submitData.url.includes('twitter.com')) {
+// TwitterはURL完全一致
+return item.url === submitData.url;
+} else {
+// その他は組み合わせ一致
+return item.antenna === (submitData.antenna || null) &&
+item.bodyColor === (submitData.bodyColor || null) &&
+item.bodyType === (submitData.bodyType || null) &&
+item.head === (submitData.head || null);
+}
+});
+}
+
 async function saveToPendingSubmissions(data) {
     const token = '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';
     const owner = 'siro-314';
@@ -68,3 +431,29 @@ async function saveToPendingSubmissions(data) {
         return false;
     }
 }
+
+function resetForm() {
+document.getElementById('antenna-input').value = '';
+document.getElementById('bodyColor-input').value = '';
+document.getElementById('bodyType-input').value = '';
+document.getElementById('dodgeRate-input').value = '';
+document.getElementById('head-input').value = '';
+document.getElementById('attackCount-input').value = '';
+document.getElementById('patternType-input').value = '';
+document.getElementById('patternRank-input').value = '';
+document.getElementById('url-input').value = '';
+submitData = {
+antenna: '',
+bodyColor: '',
+bodyType: '',
+dodgeRate: '',
+head: '',
+attackCount: '',
+patternType: '',
+patternRank: '',
+url: ''
+};
+}
+</script>
+</body>
+</html>
