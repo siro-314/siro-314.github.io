@@ -361,14 +361,75 @@ item.head === (submitData.head || null);
 });
 }
 
-function saveToPendingSubmissions(data) {
-// 実際の実装では外部API（GitHub API等）が必要
-// 現在はコンソールに出力してコピペ用形式を表示
-console.log('pending-submissions.jsonに追加するデータ:');
-console.log(JSON.stringify(data, null, 2));
-console.log('コピペ用（カンマ追加済み）:');
-console.log(',');
-console.log(JSON.stringify(data, null, 2));
+async function saveToPendingSubmissions(data) {
+    const token = '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';
+    const owner = 'denwahyou';
+    const repo = 'denwahyou.github.io';
+    const path = 'pending-submissions.json';
+    
+    try {
+        console.log('🚀 GitHub APIで投稿開始...');
+        
+        // 現在のファイル内容を取得
+        const getResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        let currentData = [];
+        let sha = '';
+        
+        if (getResponse.ok) {
+            const fileInfo = await getResponse.json();
+            sha = fileInfo.sha;
+            const content = atob(fileInfo.content);
+            currentData = JSON.parse(content);
+            console.log('✅ 既存データ取得完了:', currentData.length + '件');
+        } else {
+            console.log('📝 新規ファイル作成モード');
+        }
+        
+        // 新しいデータを追加
+        currentData.push(data);
+        console.log('📝 新しいデータ追加:', data);
+        
+        // ファイルを更新
+        const updateResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: '新規QRコード投稿 - ' + new Date().toLocaleString('ja-JP'),
+                content: btoa(JSON.stringify(currentData, null, 2)),
+                sha: sha
+            })
+        });
+        
+        if (updateResponse.ok) {
+            console.log('🎉 投稿完了！pending-submissions.jsonに自動追加されました');
+            console.log('📊 総データ数:', currentData.length + '件');
+            return true;
+        } else {
+            const errorData = await updateResponse.json();
+            console.error('❌ API エラー:', errorData);
+            throw new Error('GitHub API更新失敗: ' + errorData.message);
+        }
+        
+    } catch (error) {
+        console.error('🚨 システムエラー:', error);
+        console.log('');
+        console.log('💾 フォールバック：手動コピペ用データ');
+        console.log('='.repeat(50));
+        console.log(JSON.stringify(data, null, 2));
+        console.log('='.repeat(50));
+        alert('自動投稿に失敗しました。コンソールの手動用データをコピーしてください。');
+        return false;
+    }
 }
 
 function resetForm() {
